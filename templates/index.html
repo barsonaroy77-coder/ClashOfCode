@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClashOfCode | Cozy Dark Aesthetic Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Custom smooth scrollbars for lists */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e2530;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+
+<body class="bg-[#161b22] text-[#cbd5e1] font-sans antialiased min-h-screen selection:bg-amber-500/30 selection:text-amber-200 p-6 md:p-12">
+
+    <div class="max-w-7xl mx-auto space-y-8">
+        
+        <!-- Header -->
+        <header class="text-center space-y-2">
+            <div class="inline-block">
+                <h1 class="text-3xl md:text-5xl font-black text-[#f8fafc] tracking-tight">
+                    CLASH <span class="text-amber-400 font-light">OF</span> CODE
+                </h1>
+            </div>
+            <p class="text-[#94a3b8] text-xs md:text-sm tracking-wide uppercase font-medium">Player Progression & Intelligence Hub</p>
+        </header>
+        
+        <!-- Search Bar Section -->
+        <div class="bg-[#1f2937]/80 backdrop-blur-md p-2.5 md:p-3 rounded-full border border-[#374151]/80 max-w-xl mx-auto flex gap-2 shadow-xl">
+            <input type="text" id="tag-input" placeholder="Enter Player Tag (e.g. #298P92JG)" 
+                   class="flex-1 bg-transparent border-none px-5 py-2 text-[#f8fafc] placeholder-[#64748b] focus:outline-none text-sm md:text-base">
+            <button onclick="fetchPlayerData()" 
+                    class="bg-amber-400 hover:bg-amber-300 text-[#0f172a] font-bold px-7 py-2.5 rounded-full shadow-md transition transform active:scale-95 text-sm">
+                Analyze
+            </button>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="bg-[#1f2937] p-6 md:p-8 rounded-[2rem] border border-[#374151]/60 shadow-xl relative overflow-hidden">
+            <div class="absolute -right-16 -top-16 w-52 h-52 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div class="flex items-center gap-5">
+                    <div id="leagueTier" class="shrink-0 flex items-center justify-center">
+                        <div class="w-16 h-16 rounded-2xl bg-[#111827] border border-[#374151] flex items-center justify-center text-[#64748b] text-xs font-medium">--</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl md:text-3xl font-bold text-[#f8fafc] tracking-tight" id="player-name">Select Player</div>
+                        <div class="text-[#94a3b8] text-xs md:text-sm mt-1 flex items-center gap-2">
+                            Town Hall <span id="th-level" class="text-amber-400 font-bold px-2.5 py-0.5 bg-amber-400/10 rounded-full border border-amber-400/20">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 bg-[#111827]/60 p-4 rounded-2xl border border-[#374151]/60">
+                    <div class="space-y-0.5 px-2">
+                        <div class="text-[11px] text-[#94a3b8] font-semibold uppercase tracking-wider">Trophies</div>
+                        <div id="trophies" class="text-base md:text-lg font-bold text-[#f8fafc]">--</div>
+                    </div>
+                    <div class="space-y-0.5 px-2 border-l border-[#374151]/60">
+                        <div class="text-[11px] text-[#94a3b8] font-semibold uppercase tracking-wider">XP Level</div>
+                        <div id="expLevel" class="text-base md:text-lg font-bold text-[#f8fafc]">--</div>
+                    </div>
+                    <div class="space-y-0.5 px-2 border-l border-[#374151]/60">
+                        <div class="text-[11px] text-[#94a3b8] font-semibold uppercase tracking-wider">War Stars</div>
+                        <div id="warStars" class="text-base md:text-lg font-bold text-[#f8fafc]">--</div>
+                    </div>
+                    <div class="space-y-0.5 px-2 border-l border-[#374151]/60">
+                        <div class="text-[11px] text-[#94a3b8] font-semibold uppercase tracking-wider">Max Time</div>
+                        <div id="total-time" class="text-base md:text-lg font-bold text-amber-400">-- Days</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Main Sections Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- Heroes Section -->
+            <div class="bg-[#1f2937] p-6 rounded-[1.75rem] border border-[#374151]/60 shadow-lg flex flex-col">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#374151]/60">
+                    <h2 class="text-xs text-[#f8fafc] font-bold uppercase tracking-widest">Heroes</h2>
+                    <span class="text-[10px] bg-amber-400/10 text-amber-400 px-2 py-0.5 rounded-full font-bold">Active</span>
+                </div>
+                <div id="heroes-list" class="space-y-2.5 text-[#cbd5e1] max-h-80 overflow-y-auto pr-1 flex-1">
+                    <p class="text-[#64748b] text-xs italic text-center py-10">Search tag to load...</p>
+                </div>
+            </div>
+
+            <!-- Lab & Armies Accordions -->
+            <div class="bg-[#1f2937] p-6 rounded-[1.75rem] border-[#374151]/60 shadow-lg flex flex-col space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-[#374151]/60">
+                    <h2 class="text-xs text-[#f8fafc] font-bold uppercase tracking-widest">Lab & Armies</h2>
+                    <span class="text-[10px] bg-blue-400/10 text-blue-400 px-2 py-0.5 rounded-full font-bold">Research</span>
+                </div>
+
+                <!-- Troops Dropdown -->
+                <details id="drop-troops" class="bg-[#111827]/70 rounded-xl hover:bg-gray-900 hover:border-black border border-[#374151]/60 p-2.5 group transition" name="lab-group">
+                    <summary class="cursor-pointer text-xs font-bold text-[#e2e8f0] flex justify-between items-center select-none">
+                        <span>Troops</span>
+                        <span class="text-[10px] text-[#64748b] group-open:rotate-180 transition-transform duration-200">▼</span>
+                    </summary>
+                    <div id="troops-list" class="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+                        <p class="text-[#64748b] text-xs italic text-center py-4">Load tag first...</p>
+                    </div>
+                </details>
+
+                <!-- Spells Dropdown -->
+                <details id="drop-spells" class="bg-[#111827]/70 rounded-xl hover:bg-gray-900 hover:border-black border border-[#374151]/60 p-2.5 group transition" name="lab-group">
+                    <summary class="cursor-pointer text-xs font-bold text-[#e2e8f0] flex justify-between items-center select-none">
+                        <span>Spells</span>
+                        <span class="text-[10px] text-[#64748b] group-open:rotate-180 transition-transform duration-200">▼</span>
+                    </summary>
+                    <div id="spells-list" class="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+                        <p class="text-[#64748b] text-xs italic text-center py-4">Load tag first...</p>
+                    </div>
+                </details>
+
+                <!-- Siege Machines Dropdown -->
+                <details id="drop-sieges" class="bg-[#111827]/70 rounded-xl hover:bg-gray-900 hover:border-black border border-[#374151]/60 p-2.5 group transition" name="lab-group">
+                    <summary class="cursor-pointer text-xs font-bold text-[#e2e8f0] flex justify-between items-center select-none">
+                        <span>Siege Machines</span>
+                        <span class="text-[10px] text-[#64748b] group-open:rotate-180 transition-transform duration-200">▼</span>
+                    </summary>
+                    <div id="sieges-list" class="mt-3 space-y-2 max-h-48 overflow-y-auto pr-1 text-xs">
+                        <p class="text-[#64748b] text-xs italic text-center py-4">Load tag first...</p>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Defences Section -->
+            <div class="bg-[#1f2937] p-6 rounded-[1.75rem] border border-[#374151]/60 shadow-lg flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#374151]/60">
+                        <h2 class="text-xs text-[#f8fafc] font-bold uppercase tracking-widest">Defences</h2>
+                        <span class="text-[10px] bg-rose-400/10 text-rose-400 px-2 py-0.5 rounded-full font-bold">Structures</span>
+                    </div>
+                    <p class="text-[#94a3b8] text-xs leading-relaxed mb-4">Estimated major structural upgrade times remaining for your current Town Hall tier.</p>
+                </div>
+                <div class="bg-[#111827]/70 p-4 rounded-xl border border-[#374151]/60 flex justify-between items-center">
+                    <span class="text-xs text-[#94a3b8] font-medium">Time Required:</span>
+                    <span id="defence-time" class="text-rose-400 font-extrabold text-base">-- Days</span>
+                </div>
+            </div>
+
+            <!-- Pets Section -->
+            <div class="bg-[#1f2937] p-6 rounded-[1.75rem] border border-[#374151]/60 shadow-lg flex flex-col">
+                <div class="flex items-center justify-between mb-4 pb-2 border-b border-[#374151]/60">
+                    <h2 class="text-xs text-[#f8fafc] font-bold uppercase tracking-widest">Pets</h2>
+                    <span class="text-[10px] bg-emerald-400/10 text-emerald-400 px-2 py-0.5 rounded-full font-bold">Companion</span>
+                </div>
+                <div id="pets-list" class="space-y-2 text-[#cbd5e1] max-h-80 overflow-y-auto pr-1 flex-1 text-sm">
+                    <p class="text-[#64748b] text-sm italic text-center py-10">Search player tag to load...</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Analytics & Bar Graph Section -->
+        <div class="bg-[#1f2937] p-6 md:p-8 rounded-[2rem] border border-[#374151]/60 shadow-xl">
+            <h2 class="text-lg md:text-xl text-[#f8fafc] font-extrabold mb-6 uppercase tracking-wider text-center">Progression Analytics & Breakdown</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                <div class="space-y-6">
+                    <p class="text-[#94a3b8] text-sm leading-relaxed">This clean visual chart compares remaining cumulative upgrade times across all four major progression vectors for streamlined builder and laboratory planning.</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-[#111827]/70 p-3.5 rounded-2xl border border-[#374151]/60 flex flex-col justify-between">
+                            <span class="text-xs text-[#94a3b8] font-semibold">Heroes</span>
+                            <span id="hero-time" class="font-bold text-amber-400 text-base mt-1">-- Days</span>
+                        </div>
+                        <div class="bg-[#111827]/70 p-3.5 rounded-2xl border border-[#374151]/60 flex flex-col justify-between">
+                            <span class="text-xs text-[#94a3b8] font-semibold">Army & Lab</span>
+                            <span id="army-time" class="font-bold text-blue-400 text-base mt-1">-- Days</span>
+                        </div>
+                        <div class="bg-[#111827]/70 p-3.5 rounded-2xl border border-[#374151]/60 flex flex-col justify-between">
+                            <span class="text-xs text-[#94a3b8] font-semibold">Defences</span>
+                            <span id="def-time-stat" class="font-bold text-rose-400 text-base mt-1">-- Days</span>
+                        </div>
+                        <div class="bg-[#111827]/70 p-3.5 rounded-2xl border border-[#374151]/60 flex flex-col justify-between">
+                            <span class="text-xs text-[#94a3b8] font-semibold">Pets</span>
+                            <span id="pet-time-stat" class="font-bold text-emerald-400 text-base mt-1">-- Days</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-[#111827]/40 p-4 rounded-2xl border border-[#374151]/40 flex justify-center">
+                    <div class="w-full max-w-md h-64">
+                        <canvas id="maxingChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Handling -->
+    <script>
+        let myChart = null;
+
+        // Exclusive accordion script for lab dropdowns
+        const labDropdowns = document.querySelectorAll('details[name="lab-group"]');
+        labDropdowns.forEach((targetDropdown) => {
+            targetDropdown.addEventListener('toggle', (e) => {
+                if (targetDropdown.open) {
+                    labDropdowns.forEach((otherDropdown) => {
+                        if (otherDropdown !== targetDropdown) {
+                            otherDropdown.open = false;
+                        }
+                    });
+                }
+            });
+        });
+
+        function fetchPlayerData() {
+            const tag = document.getElementById('tag-input').value;
+            if (!tag) return alert("Please enter a player tag!");
+
+            document.getElementById('player-name').innerText = "Loading Intelligence...";
+
+            fetch(`/api/player?tag=${encodeURIComponent(tag)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Player not found");
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('player-name').innerText = data.name || "--";
+                    document.getElementById('th-level').innerText = data.townHallLevel || "--";
+                    document.getElementById('trophies').innerText = data.trophies || "--";
+                    document.getElementById('expLevel').innerText = data.expLevel || "--";
+                    document.getElementById('warStars').innerText = data.warStars || "--";
+                    
+                    const leagueElement = document.getElementById('leagueTier');
+                    if (data.leagueTier && data.leagueTier.iconUrls) {
+                        leagueElement.innerHTML = `<img src="${data.leagueTier.iconUrls.small}" alt="League Icon" class="w-14 h-14 object-contain drop-shadow-md">`;
+                    } else {
+                        leagueElement.innerHTML = `<div class="w-14 h-14 rounded-2xl bg-[#111827] border border-[#374151] flex items-center justify-center text-[#64748b] text-xs">Unranked</div>`;
+                    }
+
+                    const stats = data.maxingEstimates;
+                    document.getElementById('total-time').innerText = stats.totalDays + " Days";
+                    document.getElementById('hero-time').innerText = stats.heroesDays + " Days";
+                    document.getElementById('army-time').innerText = stats.armyDays + " Days";
+                    document.getElementById('def-time-stat').innerText = stats.defencesDays + " Days";
+                    document.getElementById('pet-time-stat').innerText = stats.petsDays + " Days";
+                    document.getElementById('defence-time').innerText = stats.defencesDays + " Days";
+
+                    const mainHeroNames = ['Barbarian King', 'Archer Queen', 'Grand Warden', 'Royal Champion', 'Minion Prince'];
+
+                    // Populate Heroes
+                    const heroesContainer = document.getElementById('heroes-list');
+                    heroesContainer.innerHTML = "";
+                    const playerHeroes = data.heroes ? data.heroes.filter(h => mainHeroNames.includes(h.name)) : [];
+                    
+                    if (playerHeroes.length > 0) {
+                        playerHeroes.forEach(hero => {
+                            heroesContainer.innerHTML += `
+                                <div class="flex justify-between items-center bg-[#111827]/70 p-2.5 rounded-xl border border-[#374151]/60 text-sm">
+                                    <span class="font-medium text-[#e2e8f0]">${hero.name}</span>
+                                    <span class="bg-amber-400/10 text-amber-400 border border-amber-400/20 px-2.5 py-0.5 rounded-lg text-xs font-bold">Lvl ${hero.level}/${hero.maxLevel}</span>
+                                </div>`;
+                        });
+                    } else {
+                        heroesContainer.innerHTML = "<p class='text-[#64748b] text-sm italic text-center py-6'>No heroes found.</p>";
+                    }
+
+                    // Populate Troops Dropdown
+                    const troopsContainer = document.getElementById('troops-list');
+                    troopsContainer.innerHTML = "";
+                    const regularTroops = data.troops ? data.troops.filter(t => !t.village || t.village === 'home') : [];
+                    
+                    if (regularTroops.length > 0) {
+                        regularTroops.forEach(troop => {
+                            troopsContainer.innerHTML += `
+                                <div class="flex justify-between items-center bg-[#1f2937] p-2 rounded-lg border border-[#374151]/60">
+                                    <span class="text-[#cbd5e1]">${troop.name}</span>
+                                    <span class="bg-blue-400/10 text-blue-400 border border-blue-400/20 px-2 py-0.5 rounded font-bold">Lvl ${troop.level}/${troop.maxLevel}</span>
+                                </div>`;
+                        });
+                    } else {
+                        troopsContainer.innerHTML = "<p class='text-[#64748b] text-xs italic text-center py-4'>No troops found.</p>";
+                    }
+
+                    // Populate Spells Dropdown
+                    const spellsContainer = document.getElementById('spells-list');
+                    spellsContainer.innerHTML = "";
+                    if (data.spells && data.spells.length > 0) {
+                        data.spells.forEach(spell => {
+                            spellsContainer.innerHTML += `
+                                <div class="flex justify-between items-center bg-[#1f2937] p-2 rounded-lg border border-[#374151]/60">
+                                    <span class="text-[#cbd5e1]">${spell.name}</span>
+                                    <span class="bg-purple-400/10 text-purple-400 border border-purple-400/20 px-2 py-0.5 rounded font-bold">Lvl ${spell.level}/${spell.maxLevel}</span>
+                                </div>`;
+                        });
+                    } else {
+                        spellsContainer.innerHTML = "<p class='text-[#64748b] text-xs italic text-center py-4'>No spells found.</p>";
+                    }
+
+                    // Populate Siege Machines Dropdown
+                    const siegesContainer = document.getElementById('sieges-list');
+                    siegesContainer.innerHTML = "";
+                    const siegeNames = ['Wall Wrecker', 'Battle Blimp', 'Stone Slammer', 'Siege Barracks', 'Log Launcher', 'Flame Flinger', 'Battle Drill'];
+                    const siegeTroops = data.troops ? data.troops.filter(t => siegeNames.includes(t.name)) : [];
+
+                    if (siegeTroops.length > 0) {
+                        siegeTroops.forEach(siege => {
+                            siegesContainer.innerHTML += `
+                                <div class="flex justify-between items-center bg-[#1f2937] p-2 rounded-lg border border-[#374151]/60">
+                                    <span class="text-[#cbd5e1]">${siege.name}</span>
+                                    <span class="bg-amber-400/10 text-amber-400 border border-amber-400/20 px-2 py-0.5 rounded font-bold">Lvl ${siege.level}/${siege.maxLevel}</span>
+                                </div>`;
+                        });
+                    } else {
+                        siegesContainer.innerHTML = "<p class='text-[#64748b] text-xs italic text-center py-4'>No Siege Machines found.</p>";
+                    }
+
+                    // Populate Pets Section
+                    const petsContainer = document.getElementById('pets-list');
+                    petsContainer.innerHTML = "";
+                    const petNames = ['L.A.S.S.I', 'Electro Owl', 'Mighty Yak', 'Unicorn', 'Frosty', 'Diggy', 'Poison Lizard', 'Phoenix', 'Spirit Fox', 'Angry Jelly'];
+                    const playerPets = data.troops ? data.troops.filter(t => petNames.includes(t.name)) : [];
+
+                    if (playerPets.length > 0) {
+                        playerPets.forEach(pet => {
+                            petsContainer.innerHTML += `
+                                <div class="flex justify-between items-center bg-[#111827]/70 p-2.5 rounded-xl border border-[#374151]/60 text-sm">
+                                    <span class="font-medium text-[#e2e8f0]">${pet.name}</span>
+                                    <span class="bg-emerald-400/10 text-emerald-400 border border-emerald-400/20 px-2.5 py-0.5 rounded-lg text-xs font-bold">Lvl ${pet.level}/${pet.maxLevel}</span>
+                                </div>`;
+                        });
+                    } else {
+                        const thLevel = data.townHallLevel || 1;
+                        if (thLevel >= 14) {
+                            petsContainer.innerHTML = "<p class='text-[#94a3b8] text-xs italic text-center py-6'>Pet House unlocked, but no pets upgraded yet.</p>";
+                        } else {
+                            petsContainer.innerHTML = "<p class='text-[#64748b] text-sm italic text-center py-6'>Pets unlock starting at Town Hall 14.</p>";
+                        }
+                    }
+
+                    // Render Bar Chart with customized cozy colors
+                    renderChart(stats.heroesDays, stats.armyDays, stats.defencesDays, stats.petsDays);
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert("Error fetching player data. Check the tag and try again.");
+                    document.getElementById('player-name').innerText = "Not Found";
+                });
+        }
+
+        function renderChart(heroDays, armyDays, defenceDays, petDays) {
+            const ctx = document.getElementById('maxingChart').getContext('2d');
+            if (myChart) {
+                myChart.destroy();
+            }
+            myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Heroes', 'Army & Lab', 'Defences', 'Pets'],
+                    datasets: [{
+                        label: 'Days Required',
+                        data: [heroDays, armyDays, defenceDays, petDays],
+                        backgroundColor: [
+                            'rgba(251, 191, 36, 0.75)', // Muted Amber
+                            'rgba(96, 165, 250, 0.75)', // Muted Blue
+                            'rgba(248, 113, 113, 0.75)', // Muted Rose
+                            'rgba(52, 211, 153, 0.75)'  // Muted Emerald
+                        ],
+                        borderColor: [
+                            'rgb(251, 191, 36)',
+                            'rgb(96, 165, 250)',
+                            'rgb(248, 113, 113)',
+                            'rgb(52, 211, 153)'
+                        ],
+                        borderWidth: 1.5,
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: '#94a3b8', font: { size: 11 } },
+                            grid: { color: 'rgba(55, 65, 81, 0.4)' }
+                        },
+                        x: {
+                            ticks: { color: '#cbd5e1', font: { size: 11, weight: 'bold' } },
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
