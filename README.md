@@ -5,9 +5,8 @@ An advanced, responsive web application built with **Flask** and **Tailwind CSS*
 ---
 
 ## 📸 Preview
-
 <p align="center">
-  <img src="image.png" alt="ClashOfCode Interface Preview" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+<img width="1916" height="857" alt="image" src="https://github.com/user-attachments/assets/0c8fd451-c969-4e51-954d-008e1644e8d8" />
 </p>
 
 ---
