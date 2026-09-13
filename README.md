@@ -4,11 +4,19 @@ An advanced, responsive web application built with **Flask** and **Tailwind CSS*
 
 ---
 
+## 📸 Preview
+
+<p align="center">
+  <img src="image.png" alt="ClashOfCode Interface Preview" width="100%" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+</p>
+
+---
+
 ## ✨ Features
 
-- **Dynamic Town Hall Scaling (TH1–TH18):** Automatically overrides global API caps to match the specific upgrade maximums for the player's exact Town Hall tier.
+- **Dynamic Town Hall Scaling :** Automatically overrides global API caps to match the specific upgrade maximums for the player's exact Town Hall tier.
 - **Comprehensive Progression Vectors:** Tracks four major upgrade categories independently:
-  - **Heroes** (including standard champions and the Minion Prince)
+  - **Heroes** (including all heroes according to the town hall)
   - **Lab & Armies** (Troops, Spells, and Siege Machines organized via clean exclusive accordions)
   - **Defences** (Major structural upgrade timeline estimators)
   - **Pets** (Tracked natively from Town Hall 14 onwards)
@@ -24,3 +32,15 @@ An advanced, responsive web application built with **Flask** and **Tailwind CSS*
 - **API:** Official Supercell Clash of Clans Developer API
 
 ---
+
+## 🚀 Getting Started
+
+### Prerequisites
+Ensure you have Python installed on your local machine along with Flask and Requests.
+
+### Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone [https://github.com/your-username/ClashOfCode.git](https://github.com/your-username/ClashOfCode.git)
+   cd ClashOfCode
